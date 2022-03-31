@@ -1,7 +1,3 @@
-type Query {
-  users: [User]!
-}
-
 type User {
   uuid: String!
   login: String!
@@ -11,12 +7,36 @@ type User {
   updatedAt: String!
 }
 
+type UserSelection {
+  limit: Int!
+  offset: Int!
+  data: [User]!
+  total: Int!
+  lastPage: Int!
+}
+
 input NewUser {
   login: String!
   email: String!
   password: String!
 }
 
+input UpdateUser {
+  uuid: String!
+  login: String!
+  email: String!
+  role: Int!
+}
+
+
+type Query {
+  getUserByUuid(uuid: String!): User!
+  getUserByLogin(login: String!): User!
+  getUsersSlice(limit: Int!,  offset: Int!): UserSelection!
+}
+
 type Mutation {
   createUser(input: NewUser!): User!
+  updateUser(input: UpdateUser!): User!
+  deleteUser(uuid: String!): User!
 }
