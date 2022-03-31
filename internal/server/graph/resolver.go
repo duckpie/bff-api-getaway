@@ -1,40 +1,45 @@
 package graph
 
 import (
-	"fmt"
-
-	"github.com/wrs-news/bff-api-getaway/internal/config"
-	pb "github.com/wrs-news/golang-proto/pkg/proto/user"
+	"github.com/wrs-news/bff-api-getaway/internal/core"
+	"github.com/wrs-news/bff-api-getaway/internal/server/graph/generated"
 	"google.golang.org/grpc"
 )
 
-type Connections struct {
-	userMs pb.UserServiceClient
-}
-
 type Resolver struct {
-	conn *Connections
+	conn map[core.ResolverConnKey]*grpc.ClientConn
 }
 
 type ResolverI interface {
-	SetConnections(cfg *config.MicroservicesConfigs) error
+	Config() generated.Config
+	AddConnection(key core.ResolverConnKey, connect func() (*grpc.ClientConn, error)) (err error)
+	Clear() (err error)
 }
 
-func (r *Resolver) SetConnections(cfg *config.MicroservicesConfigs) (func() error, error) {
-	userConn, err := grpc.Dial(fmt.Sprintf(":%d", cfg.UserMs.Port), grpc.WithInsecure())
+func (r *Resolver) AddConnection(key core.ResolverConnKey, connect func() (*grpc.ClientConn, error)) (err error) {
+	conn, err := connect()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	r.conn = &Connections{
-		userMs: pb.NewUserServiceClient(userConn),
+	r.conn[key] = conn
+	return
+}
+
+func (r *Resolver) Config() generated.Config {
+	return generated.Config{Resolvers: r}
+}
+
+func (r *Resolver) Clear() (err error) {
+	for _, c := range r.conn {
+		return c.Close()
 	}
 
-	return func() error {
-		return userConn.Close()
-	}, nil
+	return
 }
 
 func CreateResolver() *Resolver {
-	return &Resolver{}
+	return &Resolver{
+		conn: make(map[core.ResolverConnKey]*grpc.ClientConn),
+	}
 }

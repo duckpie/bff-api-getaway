@@ -8,6 +8,13 @@ type NewUser struct {
 	Password string `json:"password"`
 }
 
+type UpdateUser struct {
+	UUID  string `json:"uuid"`
+	Login string `json:"login"`
+	Email string `json:"email"`
+	Role  int    `json:"role"`
+}
+
 type User struct {
 	UUID      string `json:"uuid"`
 	Login     string `json:"login"`
@@ -15,4 +22,12 @@ type User struct {
 	Role      int    `json:"role"`
 	CreatedAt string `json:"createdAt"`
 	UpdatedAt string `json:"updatedAt"`
+}
+
+type UserSelection struct {
+	Limit    int     `json:"limit"`
+	Offset   int     `json:"offset"`
+	Data     []*User `json:"data"`
+	Total    int     `json:"total"`
+	LastPage int     `json:"lastPage"`
 }
