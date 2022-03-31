@@ -13,7 +13,7 @@ import (
 )
 
 type server struct {
-	cfg *config.ServerConfig
+	cfg *config.Config
 }
 
 type ServerI interface {
@@ -21,18 +21,24 @@ type ServerI interface {
 }
 
 func (s *server) Run() error {
-	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
+	res := graph.CreateResolver()
+	breaker, err := res.SetConnections(&s.cfg.Microservices)
+	if err != nil {
+		return err
+	}
+
+	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: res}))
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", srv)
 
-	log.Printf("connect to http://localhost:%d/ for GraphQL playground", s.cfg.Port)
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", s.cfg.Port), nil))
+	log.Printf("connect to http://localhost:%d/ for GraphQL playground", s.cfg.Services.Server.Port)
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", s.cfg.Services.Server.Port), nil))
 
-	return nil
+	return breaker()
 }
 
-func InitServer(cfg *config.ServerConfig) ServerI {
+func InitServer(cfg *config.Config) ServerI {
 	return &server{
 		cfg: cfg,
 	}

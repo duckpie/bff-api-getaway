@@ -5,14 +5,30 @@ package graph
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/wrs-news/bff-api-getaway/internal/server/graph/generated"
 	"github.com/wrs-news/bff-api-getaway/internal/server/graph/model"
+	pb "github.com/wrs-news/golang-proto/pkg/proto/user"
 )
 
 func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) (*model.User, error) {
-	panic(fmt.Errorf("not implemented"))
+	resp, err := r.Resolver.conn.userMs.CreateUser(ctx, &pb.NewUserReq{
+		Login:    input.Login,
+		Email:    input.Email,
+		Password: input.Password,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.User{
+		UUID:      resp.Uuid,
+		Login:     resp.Login,
+		Email:     resp.Email,
+		Role:      int(resp.Role),
+		CreatedAt: resp.CreatedAt,
+		UpdatedAt: resp.UpdatedAt,
+	}, nil
 }
 
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {

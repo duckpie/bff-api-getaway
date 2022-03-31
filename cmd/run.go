@@ -69,7 +69,7 @@ func runner(cfg *config.Config) (err error) {
 	errs, ctx := errgroup.WithContext(ctx)
 
 	errs.Go(func() error {
-		return server.InitServer(&cfg.Services.Server).Run()
+		return server.InitServer(cfg).Run()
 	})
 
 	<-ctx.Done()
