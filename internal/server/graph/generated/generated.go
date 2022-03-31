@@ -336,10 +336,10 @@ input NewUser {
 }
 
 input UpdateUser {
-    uuid: String!
-    login: String!
-    email: String!
-    role: Int!
+  uuid: String!
+  login: String!
+  email: String!
+  role: Int!
 }
 
 
