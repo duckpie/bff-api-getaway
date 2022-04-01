@@ -5,8 +5,11 @@ package graph
 
 import (
 	"context"
+	"regexp"
 	"time"
 
+	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/go-ozzo/ozzo-validation/v4/is"
 	"github.com/wrs-news/bff-api-getaway/internal/core"
 	"github.com/wrs-news/bff-api-getaway/internal/server/graph/generated"
 	"github.com/wrs-news/bff-api-getaway/internal/server/graph/model"
@@ -14,6 +17,10 @@ import (
 )
 
 func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) (*model.User, error) {
+	if err := input.Validation(); err != nil {
+		return nil, err
+	}
+
 	conn := pb.NewUserServiceClient(r.Resolver.conn[core.UMS])
 	rptr := Repeater(func(ctx context.Context) (interface{}, error) {
 		resp, err := conn.CreateUser(ctx, &pb.NewUserReq{
@@ -37,6 +44,10 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) 
 }
 
 func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUser) (*model.User, error) {
+	if err := input.Validation(); err != nil {
+		return nil, err
+	}
+
 	conn := pb.NewUserServiceClient(r.Resolver.conn[core.UMS])
 	rptr := Repeater(func(ctx context.Context) (interface{}, error) {
 		resp, err := conn.UpdateUser(ctx, &pb.UpdateUserReq{
@@ -61,6 +72,10 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUse
 }
 
 func (r *mutationResolver) DeleteUser(ctx context.Context, uuid string) (*model.User, error) {
+	if err := validation.Validate(uuid, validation.Required, is.UUIDv4); err != nil {
+		return nil, err
+	}
+
 	conn := pb.NewUserServiceClient(r.Resolver.conn[core.UMS])
 	rptr := Repeater(func(ctx context.Context) (interface{}, error) {
 		resp, err := conn.DeleteUser(ctx, &pb.UserReqUuid{Uuid: uuid})
@@ -80,6 +95,10 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, uuid string) (*model.
 }
 
 func (r *queryResolver) GetUserByUUID(ctx context.Context, uuid string) (*model.User, error) {
+	if err := validation.Validate(uuid, validation.Required, is.UUIDv4); err != nil {
+		return nil, err
+	}
+
 	conn := pb.NewUserServiceClient(r.Resolver.conn[core.UMS])
 	rptr := Repeater(func(ctx context.Context) (interface{}, error) {
 		resp, err := conn.GetUserByUuid(ctx, &pb.UserReqUuid{Uuid: uuid})
@@ -99,6 +118,10 @@ func (r *queryResolver) GetUserByUUID(ctx context.Context, uuid string) (*model.
 }
 
 func (r *queryResolver) GetUserByLogin(ctx context.Context, login string) (*model.User, error) {
+	if err := validation.Validate(login, validation.Required, validation.Match(regexp.MustCompile(core.RegexName))); err != nil {
+		return nil, err
+	}
+
 	conn := pb.NewUserServiceClient(r.Resolver.conn[core.UMS])
 	rptr := Repeater(func(ctx context.Context) (interface{}, error) {
 		resp, err := conn.GetUserByLogin(ctx, &pb.UserReqLogin{Login: login})
@@ -118,6 +141,14 @@ func (r *queryResolver) GetUserByLogin(ctx context.Context, login string) (*mode
 }
 
 func (r *queryResolver) GetUsersSlice(ctx context.Context, limit int, offset int) (*model.UserSelection, error) {
+	if err := validation.Validate(limit, validation.Min(1), validation.Max(30), validation.Required); err != nil {
+		return nil, err
+	}
+
+	if err := validation.Validate(offset, validation.Min(0), validation.Required.When(offset > 0)); err != nil {
+		return nil, err
+	}
+
 	conn := pb.NewUserServiceClient(r.Resolver.conn[core.UMS])
 	rptr := Repeater(func(ctx context.Context) (interface{}, error) {
 		resp, err := conn.GetAll(ctx, &pb.SelectionReq{
