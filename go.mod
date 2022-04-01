@@ -4,11 +4,13 @@ go 1.17
 
 require (
 	github.com/99designs/gqlgen v0.17.2
+	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
 	github.com/vektah/gqlparser/v2 v2.4.1
 	github.com/wrs-news/golang-proto v0.2.2
 )
 
 require (
+	github.com/asaskevich/govalidator v0.0.0-20200108200545-475eaeb16496 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
