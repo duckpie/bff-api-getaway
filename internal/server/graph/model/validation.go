@@ -23,6 +23,7 @@ func (s *NewUser) Validation() error {
 		),
 
 		validation.Field(&s.Password,
+			validation.Length(8, 20),
 			validation.Required,
 		),
 	)

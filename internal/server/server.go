@@ -21,6 +21,8 @@ type server struct {
 
 type ServerI interface {
 	Run() error
+	Config() (err error)
+	Resolver() *graph.Resolver
 }
 
 func (s *server) Run() (err error) {
@@ -51,6 +53,10 @@ func (s *server) Config() (err error) {
 	}
 
 	return
+}
+
+func (s *server) Resolver() *graph.Resolver {
+	return s.rlv
 }
 
 func InitServer(cfg *config.Config) ServerI {

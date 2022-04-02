@@ -15,7 +15,10 @@ func Repeater(effector Effector, retries int, delay time.Duration) Effector {
 	return func(ctx context.Context) (interface{}, error) {
 		for r := 0; ; r++ {
 			resp, err := effector(ctx)
-			if err == nil {
+			switch err {
+			case nil:
+				return resp, err
+			default:
 				s, _ := status.FromError(err)
 				if s.Code() != codes.Unavailable || r >= retries {
 					return resp, err
