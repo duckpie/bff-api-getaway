@@ -11,14 +11,9 @@ require (
 
 require (
 	github.com/asaskevich/govalidator v0.0.0-20200108200545-475eaeb16496 // indirect
-	github.com/coreos/etcd v3.3.27+incompatible // indirect
-	github.com/coreos/go-semver v0.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
-	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421 // indirect
-	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	golang.org/x/net v0.0.0-20211015210444-4f30a5c0130f // indirect
@@ -37,7 +32,8 @@ require (
 	github.com/mitchellh/mapstructure v1.2.3 // indirect
 	github.com/spf13/cobra v1.4.0
 	github.com/stretchr/testify v1.7.1
-	go.etcd.io/etcd v3.3.27+incompatible
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	google.golang.org/grpc v1.45.0
 )
+
+replace google.golang.org/genproto => ./libs/genproto

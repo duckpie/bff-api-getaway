@@ -19,7 +19,8 @@ type MicroservicesConfigs struct {
 }
 
 type UserMsConfig struct {
-	Port int64 `toml:"PORT"`
+	Host string `toml:"HOST"`
+	Port int64  `toml:"PORT"`
 }
 
 func NewConfig() *Config {

@@ -45,7 +45,7 @@ func (s *server) Config() (err error) {
 	// Подключение микросевиса пользователей
 	if err := s.rlv.AddConnection(core.UMS, func() (*grpc.ClientConn, error) {
 		return grpc.Dial(
-			fmt.Sprintf(":%d", s.cfg.Microservices.UserMs.Port),
+			fmt.Sprintf("%s:%d", s.cfg.Microservices.UserMs.Host, s.cfg.Microservices.UserMs.Port),
 			grpc.WithInsecure(),
 		)
 	}); err != nil {

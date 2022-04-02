@@ -63,17 +63,21 @@ func runner(cfg *config.Config) (err error) {
 	}()
 
 	// Создание контекста
-	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
-	defer stop()
-
+	ctx := context.Background()
 	errs, ctx := errgroup.WithContext(ctx)
 
 	errs.Go(func() error {
 		return server.InitServer(cfg).Run()
 	})
 
-	<-ctx.Done()
-	stop()
+	cancelInterrupt := make(chan struct{})
 
-	return errs.Wait()
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
+	select {
+	case sig := <-c:
+		return fmt.Errorf("received signal %s", sig)
+	case <-cancelInterrupt:
+		return errs.Wait()
+	}
 }
