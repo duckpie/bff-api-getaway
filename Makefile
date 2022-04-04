@@ -3,10 +3,7 @@ SERVICE=app
 .PHONY: run
 
 run:
-	go build -o $(SERVICE) main.go
-	clear		
-	./$(SERVICE) run
-
+	sudo docker-compose -f docker-compose.local.yml up
 
 .PHONY: count
 
