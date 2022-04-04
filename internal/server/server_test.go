@@ -14,7 +14,7 @@ var (
 )
 
 func TestMain(m *testing.M) {
-	if _, err := toml.DecodeFile("../../config/config.local.toml", testConfig); err != nil {
+	if _, err := toml.DecodeFile("../../config/config.test.toml", testConfig); err != nil {
 		log.Fatalf(err.Error())
 	}
 
