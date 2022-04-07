@@ -1,0 +1,10 @@
+version: "3.9"
+services:
+  api_getaway:
+    build:
+      dockerfile: Dockerfile.test
+      context: .
+
+networks:
+  default:
+    name: wrsnet

@@ -7,5 +7,5 @@ HOST = "127.0.0.1"
 [microservices]
 
 [microservices.user]
-HOST = "127.0.0.1"
+HOST = "user_ms_service"
 PORT = 50051
