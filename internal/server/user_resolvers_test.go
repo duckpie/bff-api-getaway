@@ -69,8 +69,8 @@ func Test_Create_User(t *testing.T) {
 				getUserByUuid(uuid: "%s"){
 				uuid
 				login
-				}
 			}
+		}
 		`,
 			uuid,
 		), &resp)
@@ -92,8 +92,8 @@ func Test_Create_User(t *testing.T) {
 				getUserByLogin(login: "%s"){
 				uuid
 				login
-				}
 			}
+		}
 		`,
 			login,
 		), &resp)
