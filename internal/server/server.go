@@ -7,8 +7,8 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/duckpie/cherry"
 	"github.com/wrs-news/bff-api-getaway/internal/config"
-	"github.com/wrs-news/bff-api-getaway/internal/core"
 	"github.com/wrs-news/bff-api-getaway/internal/server/graph"
 	"github.com/wrs-news/bff-api-getaway/internal/server/graph/generated"
 	"google.golang.org/grpc"
@@ -43,7 +43,7 @@ func (s *server) Run() (err error) {
 
 func (s *server) Config() (err error) {
 	// Подключение микросевиса пользователей
-	if err := s.rlv.AddConnection(core.UMS, func() (*grpc.ClientConn, error) {
+	if err := s.rlv.AddConnection(cherry.UMS, func() (*grpc.ClientConn, error) {
 		return grpc.Dial(
 			fmt.Sprintf("%s:%d", s.cfg.Microservices.UserMs.Host, s.cfg.Microservices.UserMs.Port),
 			grpc.WithInsecure(),

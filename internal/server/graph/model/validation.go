@@ -3,9 +3,9 @@ package model
 import (
 	"regexp"
 
+	"github.com/duckpie/cherry"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/go-ozzo/ozzo-validation/v4/is"
-	"github.com/wrs-news/bff-api-getaway/internal/core"
 )
 
 func (s *NewUser) Validation() error {
@@ -19,7 +19,7 @@ func (s *NewUser) Validation() error {
 
 		validation.Field(&s.Login,
 			validation.Required,
-			validation.Match(regexp.MustCompile(core.RegexName)),
+			validation.Match(regexp.MustCompile(cherry.RegexName)),
 		),
 
 		validation.Field(&s.Password,
@@ -45,7 +45,7 @@ func (s *UpdateUser) Validation() error {
 
 		validation.Field(&s.Login,
 			validation.Required,
-			validation.Match(regexp.MustCompile(core.RegexName)),
+			validation.Match(regexp.MustCompile(cherry.RegexName)),
 		),
 
 		validation.Field(&s.Role,

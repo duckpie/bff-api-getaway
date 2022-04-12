@@ -1,22 +1,22 @@
 package graph
 
 import (
-	"github.com/wrs-news/bff-api-getaway/internal/core"
+	"github.com/duckpie/cherry"
 	"github.com/wrs-news/bff-api-getaway/internal/server/graph/generated"
 	"google.golang.org/grpc"
 )
 
 type Resolver struct {
-	conn map[core.ResolverConnKey]*grpc.ClientConn
+	conn map[cherry.ConnKey]*grpc.ClientConn
 }
 
 type ResolverI interface {
 	Config() generated.Config
-	AddConnection(key core.ResolverConnKey, connect func() (*grpc.ClientConn, error)) (err error)
+	AddConnection(key cherry.ConnKey, connect func() (*grpc.ClientConn, error)) (err error)
 	Clear() (err error)
 }
 
-func (r *Resolver) AddConnection(key core.ResolverConnKey, connect func() (*grpc.ClientConn, error)) (err error) {
+func (r *Resolver) AddConnection(key cherry.ConnKey, connect func() (*grpc.ClientConn, error)) (err error) {
 	conn, err := connect()
 	if err != nil {
 		return err
@@ -40,6 +40,6 @@ func (r *Resolver) Clear() (err error) {
 
 func CreateResolver() *Resolver {
 	return &Resolver{
-		conn: make(map[core.ResolverConnKey]*grpc.ClientConn),
+		conn: make(map[cherry.ConnKey]*grpc.ClientConn),
 	}
 }

@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/99designs/gqlgen v0.17.2
+	github.com/duckpie/cherry v0.0.0-20220412195637-e829765a28c6
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
 	github.com/vektah/gqlparser/v2 v2.4.1
 	github.com/wrs-news/golang-proto v0.2.2
