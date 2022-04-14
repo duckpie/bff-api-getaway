@@ -52,6 +52,16 @@ func (s *server) Config() (err error) {
 		return err
 	}
 
+	// Подключение микросервиса безопасности
+	if err := s.rlv.AddConnection(cherry.SMS, func() (*grpc.ClientConn, error) {
+		return grpc.Dial(
+			fmt.Sprintf("%s:%d", s.cfg.Microservices.SecurityMs.Host, s.cfg.Microservices.SecurityMs.Port),
+			grpc.WithInsecure(),
+		)
+	}); err != nil {
+		return err
+	}
+
 	return
 }
 

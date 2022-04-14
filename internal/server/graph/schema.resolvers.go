@@ -14,7 +14,8 @@ import (
 	"github.com/go-ozzo/ozzo-validation/v4/is"
 	"github.com/wrs-news/bff-api-getaway/internal/server/graph/generated"
 	"github.com/wrs-news/bff-api-getaway/internal/server/graph/model"
-	pb "github.com/wrs-news/golang-proto/pkg/proto/user"
+	pbs "github.com/wrs-news/golang-proto/pkg/proto/security"
+	pbu "github.com/wrs-news/golang-proto/pkg/proto/user"
 )
 
 func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) (*model.User, error) {
@@ -22,9 +23,9 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) 
 		return nil, err
 	}
 
-	conn := pb.NewUserServiceClient(r.Resolver.conn[cherry.UMS])
+	conn := pbu.NewUserServiceClient(r.Resolver.conn[cherry.UMS])
 	rptr := cherrynet.GrpcRepeater(func(ctx context.Context) (interface{}, error) {
-		resp, err := conn.CreateUser(ctx, &pb.NewUserReq{
+		resp, err := conn.CreateUser(ctx, &pbu.NewUserReq{
 			Login:    input.Login,
 			Email:    input.Email,
 			Password: input.Password,
@@ -41,7 +42,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) 
 		return nil, err
 	}
 
-	return pbUserToGraphQlUser(resp.(*pb.User)), nil
+	return pbUserToGraphQlUser(resp.(*pbu.User)), nil
 }
 
 func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUser) (*model.User, error) {
@@ -49,9 +50,9 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUse
 		return nil, err
 	}
 
-	conn := pb.NewUserServiceClient(r.Resolver.conn[cherry.UMS])
+	conn := pbu.NewUserServiceClient(r.Resolver.conn[cherry.UMS])
 	rptr := cherrynet.GrpcRepeater(func(ctx context.Context) (interface{}, error) {
-		resp, err := conn.UpdateUser(ctx, &pb.UpdateUserReq{
+		resp, err := conn.UpdateUser(ctx, &pbu.UpdateUserReq{
 			Uuid:  input.UUID,
 			Login: input.Login,
 			Email: input.Email,
@@ -69,7 +70,7 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUse
 		return nil, err
 	}
 
-	return pbUserToGraphQlUser(resp.(*pb.User)), nil
+	return pbUserToGraphQlUser(resp.(*pbu.User)), nil
 }
 
 func (r *mutationResolver) DeleteUser(ctx context.Context, uuid string) (*model.User, error) {
@@ -77,9 +78,9 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, uuid string) (*model.
 		return nil, err
 	}
 
-	conn := pb.NewUserServiceClient(r.Resolver.conn[cherry.UMS])
+	conn := pbu.NewUserServiceClient(r.Resolver.conn[cherry.UMS])
 	rptr := cherrynet.GrpcRepeater(func(ctx context.Context) (interface{}, error) {
-		resp, err := conn.DeleteUser(ctx, &pb.UserReqUuid{Uuid: uuid})
+		resp, err := conn.DeleteUser(ctx, &pbu.UserReqUuid{Uuid: uuid})
 		if err != nil {
 			return nil, err
 		}
@@ -92,7 +93,76 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, uuid string) (*model.
 		return nil, err
 	}
 
-	return pbUserToGraphQlUser(resp.(*pb.User)), nil
+	return pbUserToGraphQlUser(resp.(*pbu.User)), nil
+}
+
+func (r *mutationResolver) CreateAuth(ctx context.Context, input model.Login) (*model.Tokens, error) {
+	if err := input.Validation(); err != nil {
+		return nil, err
+	}
+
+	conn := pbs.NewSecurityServiceClient(r.Resolver.conn[cherry.SMS])
+	rptr := cherrynet.GrpcRepeater(func(ctx context.Context) (interface{}, error) {
+		resp, err := conn.Login(ctx, &pbs.LoginReq{
+			Login:    input.Login,
+			Password: input.Password,
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		return resp, nil
+	}, 3, time.Second)
+
+	resp, err := rptr(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.Tokens{
+		RefreshToken: resp.(*pbs.TokensPair).RefreshToken,
+		AccessToken:  resp.(*pbs.TokensPair).AccessToken,
+	}, nil
+}
+
+func (r *mutationResolver) RefreshToken(ctx context.Context, token string) (*model.Tokens, error) {
+	conn := pbs.NewSecurityServiceClient(r.Resolver.conn[cherry.SMS])
+	rptr := cherrynet.GrpcRepeater(func(ctx context.Context) (interface{}, error) {
+		resp, err := conn.RefreshToken(ctx, &pbs.RefreshTokenReq{Token: token})
+		if err != nil {
+			return nil, err
+		}
+
+		return resp, nil
+	}, 3, time.Second)
+
+	resp, err := rptr(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.Tokens{
+		RefreshToken: resp.(*pbs.TokensPair).RefreshToken,
+		AccessToken:  resp.(*pbs.TokensPair).AccessToken,
+	}, nil
+}
+
+func (r *mutationResolver) Logout(ctx context.Context, accessToken string) (*model.StatusResp, error) {
+	conn := pbs.NewSecurityServiceClient(r.Resolver.conn[cherry.SMS])
+	rptr := cherrynet.GrpcRepeater(func(ctx context.Context) (interface{}, error) {
+		resp, err := conn.Logout(ctx, &pbs.LogoutReq{Token: accessToken})
+		if err != nil {
+			return &model.StatusResp{Status: string(cherry.StatusFail)}, err
+		}
+
+		return resp, nil
+	}, 3, time.Second)
+
+	if _, err := rptr(ctx); err != nil {
+		return &model.StatusResp{Status: string(cherry.StatusFail)}, err
+	}
+
+	return &model.StatusResp{Status: string(cherry.StatusOk)}, nil
 }
 
 func (r *queryResolver) GetUserByUUID(ctx context.Context, uuid string) (*model.User, error) {
@@ -100,9 +170,9 @@ func (r *queryResolver) GetUserByUUID(ctx context.Context, uuid string) (*model.
 		return nil, err
 	}
 
-	conn := pb.NewUserServiceClient(r.Resolver.conn[cherry.UMS])
+	conn := pbu.NewUserServiceClient(r.Resolver.conn[cherry.UMS])
 	rptr := cherrynet.GrpcRepeater(func(ctx context.Context) (interface{}, error) {
-		resp, err := conn.GetUserByUuid(ctx, &pb.UserReqUuid{Uuid: uuid})
+		resp, err := conn.GetUserByUuid(ctx, &pbu.UserReqUuid{Uuid: uuid})
 		if err != nil {
 			return nil, err
 		}
@@ -115,7 +185,7 @@ func (r *queryResolver) GetUserByUUID(ctx context.Context, uuid string) (*model.
 		return nil, err
 	}
 
-	return pbUserToGraphQlUser(resp.(*pb.User)), nil
+	return pbUserToGraphQlUser(resp.(*pbu.User)), nil
 }
 
 func (r *queryResolver) GetUserByLogin(ctx context.Context, login string) (*model.User, error) {
@@ -123,9 +193,9 @@ func (r *queryResolver) GetUserByLogin(ctx context.Context, login string) (*mode
 		return nil, err
 	}
 
-	conn := pb.NewUserServiceClient(r.Resolver.conn[cherry.UMS])
+	conn := pbu.NewUserServiceClient(r.Resolver.conn[cherry.UMS])
 	rptr := cherrynet.GrpcRepeater(func(ctx context.Context) (interface{}, error) {
-		resp, err := conn.GetUserByLogin(ctx, &pb.UserReqLogin{Login: login})
+		resp, err := conn.GetUserByLogin(ctx, &pbu.UserReqLogin{Login: login})
 		if err != nil {
 			return nil, err
 		}
@@ -138,7 +208,7 @@ func (r *queryResolver) GetUserByLogin(ctx context.Context, login string) (*mode
 		return nil, err
 	}
 
-	return pbUserToGraphQlUser(resp.(*pb.User)), nil
+	return pbUserToGraphQlUser(resp.(*pbu.User)), nil
 }
 
 func (r *queryResolver) GetUsersSlice(ctx context.Context, limit int, offset int) (*model.UserSelection, error) {
@@ -150,9 +220,9 @@ func (r *queryResolver) GetUsersSlice(ctx context.Context, limit int, offset int
 		return nil, err
 	}
 
-	conn := pb.NewUserServiceClient(r.Resolver.conn[cherry.UMS])
+	conn := pbu.NewUserServiceClient(r.Resolver.conn[cherry.UMS])
 	rptr := cherrynet.GrpcRepeater(func(ctx context.Context) (interface{}, error) {
-		resp, err := conn.GetAll(ctx, &pb.SelectionReq{
+		resp, err := conn.GetAll(ctx, &pbu.SelectionReq{
 			Limit:  int32(limit),
 			Offset: int32(offset),
 		})
@@ -169,12 +239,34 @@ func (r *queryResolver) GetUsersSlice(ctx context.Context, limit int, offset int
 	}
 
 	return &model.UserSelection{
-		Limit:    int(resp.(*pb.Selection).Limit),
-		Offset:   int(resp.(*pb.Selection).Offset),
-		Total:    int(resp.(*pb.Selection).Total),
-		LastPage: int(resp.(*pb.Selection).LastPage),
-		Data:     arrPbUserToArrGraphQlUser(resp.(*pb.Selection).Data),
+		Limit:    int(resp.(*pbu.Selection).Limit),
+		Offset:   int(resp.(*pbu.Selection).Offset),
+		Total:    int(resp.(*pbu.Selection).Total),
+		LastPage: int(resp.(*pbu.Selection).LastPage),
+		Data:     arrPbUserToArrGraphQlUser(resp.(*pbu.Selection).Data),
 	}, nil
+}
+
+func (r *queryResolver) AuthCheck(ctx context.Context, accessToken string) (*model.StatusResp, error) {
+	if err := validation.Validate(accessToken, validation.Required); err != nil {
+		return &model.StatusResp{Status: string(cherry.StatusFail)}, err
+	}
+
+	conn := pbs.NewSecurityServiceClient(r.Resolver.conn[cherry.SMS])
+	rptr := cherrynet.GrpcRepeater(func(ctx context.Context) (interface{}, error) {
+		resp, err := conn.AuthCheck(ctx, &pbs.AuthCheckReq{AccessToken: accessToken})
+		if err != nil {
+			return &model.StatusResp{Status: string(cherry.StatusFail)}, err
+		}
+
+		return resp, nil
+	}, 3, time.Second)
+
+	if _, err := rptr(ctx); err != nil {
+		return &model.StatusResp{Status: string(cherry.StatusFail)}, err
+	}
+
+	return &model.StatusResp{Status: string(cherry.StatusOk)}, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

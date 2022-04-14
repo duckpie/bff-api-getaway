@@ -4,11 +4,12 @@ go 1.17
 
 require (
 	github.com/99designs/gqlgen v0.17.2
-	github.com/duckpie/cherry v0.0.0-20220412195637-e829765a28c6
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
 	github.com/vektah/gqlparser/v2 v2.4.1
-	github.com/wrs-news/golang-proto v0.2.2
+	github.com/wrs-news/golang-proto v0.3.5
 )
+
+require github.com/duckpie/cherry v0.1.0
 
 require (
 	github.com/asaskevich/govalidator v0.0.0-20200108200545-475eaeb16496 // indirect
@@ -21,7 +22,7 @@ require (
 	golang.org/x/sys v0.0.0-20211019181941-9d821ace8654 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013 // indirect
-	google.golang.org/protobuf v1.26.0 // indirect
+	google.golang.org/protobuf v1.28.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c // indirect
 )
 

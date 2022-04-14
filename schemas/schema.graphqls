@@ -28,15 +28,36 @@ input UpdateUser {
   role: Int!
 }
 
+# 
+
+type Tokens {
+  refreshToken: String!
+  accessToken: String!
+}
+
+type StatusResp {
+  status: String!
+}
+
+input Login {
+  login: String!
+  password: String!
+}
 
 type Query {
   getUserByUuid(uuid: String!): User!
   getUserByLogin(login: String!): User!
   getUsersSlice(limit: Int!,  offset: Int!): UserSelection!
+
+  authCheck(accessToken: String!): StatusResp!
 }
 
 type Mutation {
   createUser(input: NewUser!): User!
   updateUser(input: UpdateUser!): User!
   deleteUser(uuid: String!): User!
+
+  createAuth(input: Login!): Tokens!
+  refreshToken(token: String!): Tokens!
+  logout(accessToken: String!): StatusResp!
 }

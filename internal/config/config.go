@@ -15,10 +15,16 @@ type ServerConfig struct {
 }
 
 type MicroservicesConfigs struct {
-	UserMs UserMsConfig `toml:"user"`
+	UserMs     UserMsConfig     `toml:"user"`
+	SecurityMs SecurityMsConfig `toml:"security"`
 }
 
 type UserMsConfig struct {
+	Host string `toml:"HOST"`
+	Port int64  `toml:"PORT"`
+}
+
+type SecurityMsConfig struct {
 	Host string `toml:"HOST"`
 	Port int64  `toml:"PORT"`
 }

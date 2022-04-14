@@ -2,10 +2,24 @@
 
 package model
 
+type Login struct {
+	Login    string `json:"login"`
+	Password string `json:"password"`
+}
+
 type NewUser struct {
 	Login    string `json:"login"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
+}
+
+type StatusResp struct {
+	Status string `json:"status"`
+}
+
+type Tokens struct {
+	RefreshToken string `json:"refreshToken"`
+	AccessToken  string `json:"accessToken"`
 }
 
 type UpdateUser struct {

@@ -9,3 +9,7 @@ HOST = "127.0.0.1"
 [microservices.user]
 HOST="user_ms_service"
 PORT = 50051
+
+[microservices.security]
+HOST="security_ms"
+PORT = 50055
