@@ -1,7 +1,6 @@
 package server_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/99designs/gqlgen/client"
@@ -37,15 +36,18 @@ func Test_Server_User(t *testing.T) {
 		}
 
 		c.MustPost(`
-		mutation {
-			createUser(input: {login: "tester1", email: "tester1@gmail.com", password: "12344321"}){
+		mutation ($login: String!, $email: String!, $password: String!){
+			createUser(input: {login: $login, email: $email, password: $password}){
 				uuid
 				login
 				email
 				role
 			}
-		}
-		`, &resp)
+		}`, &resp,
+			client.Var("login", "tester1"),
+			client.Var("email", "tester1@gmail.com"),
+			client.Var("password", "12344321"),
+		)
 
 		assert.NoError(t, validation.Validate(resp.CreateUser.UUID, is.UUIDv4))
 		assert.Equal(t, "tester1", resp.CreateUser.Login)
@@ -64,16 +66,15 @@ func Test_Server_User(t *testing.T) {
 			}
 		}
 
-		c.MustPost(fmt.Sprintf(`
-			query {
-				getUserByUuid(uuid: "%s"){
+		c.MustPost(`
+		query ($uuid: String!){
+			getUserByUuid(uuid: $uuid){
 				uuid
 				login
 			}
-		}
-		`,
-			uuid,
-		), &resp)
+		}`, &resp,
+			client.Var("uuid", uuid),
+		)
 
 		assert.Equal(t, uuid, resp.GetUserByUuid.UUID)
 		assert.Equal(t, login, resp.GetUserByUuid.Login)
@@ -87,16 +88,16 @@ func Test_Server_User(t *testing.T) {
 			}
 		}
 
-		c.MustPost(fmt.Sprintf(`
-			query {
-				getUserByLogin(login: "%s"){
+		c.MustPost(`
+		query ($login: String!){
+			getUserByLogin(login: $login){
 				uuid
 				login
 			}
 		}
-		`,
-			login,
-		), &resp)
+		`, &resp,
+			client.Var("login", login),
+		)
 
 		assert.Equal(t, uuid, resp.GetUserByLogin.UUID)
 		assert.Equal(t, login, resp.GetUserByLogin.Login)
@@ -117,8 +118,8 @@ func Test_Server_User(t *testing.T) {
 		}
 
 		c.MustPost(`
-		query {
-			getUsersSlice(limit: 30, offset: 0){
+		query ($limit: Int!, $offset: Int!) {
+			getUsersSlice(limit: $limit, offset: $offset){
 			  limit
 			  offset
 			  total
@@ -128,8 +129,10 @@ func Test_Server_User(t *testing.T) {
 			  }
 			  lastPage
 			}
-		  }
-		`, &resp)
+		}`, &resp,
+			client.Var("limit", 30),
+			client.Var("offset", 0),
+		)
 
 		assert.NotNil(t, resp)
 	})
@@ -142,19 +145,18 @@ func Test_Server_User(t *testing.T) {
 			}
 		}
 
-		c.MustPost(fmt.Sprintf(`
-		mutation {
-			updateUser(input: {uuid:"%s", login: "%s", email: "%s", role: %d}){
+		c.MustPost(`
+		mutation ($uuid: String!, $login: String!, $email: String!, $role: Int!) {
+			updateUser(input: {uuid: $uuid, login: $login, email: $email, role: $role}){
 			  uuid			
 			  role
 			}
-		  }
-		`,
-			uuid,
-			login,
-			email,
-			1,
-		), &resp)
+		}`, &resp,
+			client.Var("uuid", uuid),
+			client.Var("login", login),
+			client.Var("email", email),
+			client.Var("role", 1),
+		)
 
 		assert.Equal(t, uuid, resp.UpdateUser.UUID)
 		assert.Equal(t, 1, resp.UpdateUser.Role)
@@ -168,15 +170,14 @@ func Test_Server_User(t *testing.T) {
 			}
 		}
 
-		c.MustPost(fmt.Sprintf(`
-		mutation {
-			deleteUser(uuid: "%s"){
+		c.MustPost(`
+		mutation ($uuid: String!){
+			deleteUser(uuid: $uuid){
 			  uuid
 			}
-		  }
-		`,
-			uuid,
-		), &resp)
+		}`, &resp,
+			client.Var("uuid", uuid),
+		)
 
 		assert.Equal(t, uuid, resp.DeleteUser.UUID)
 	})
