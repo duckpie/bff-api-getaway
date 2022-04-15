@@ -17,10 +17,6 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-var (
-	env string
-)
-
 func runCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "run",
@@ -30,7 +26,7 @@ func runCmd() *cobra.Command {
 			cfg := config.NewConfig()
 
 			if _, err := toml.DecodeFile(
-				fmt.Sprintf("config/config.%s.toml", env), cfg); err != nil {
+				fmt.Sprintf("config/config.%s.toml", os.Getenv("ENV")), cfg); err != nil {
 				log.Printf(err.Error())
 				os.Exit(1)
 			}
@@ -41,8 +37,6 @@ func runCmd() *cobra.Command {
 			}
 		},
 	}
-
-	flag.StringVar(&env, "env", "local", "Launch environment")
 
 	flag.Parse()
 	return cmd

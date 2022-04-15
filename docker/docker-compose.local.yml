@@ -2,11 +2,13 @@ version: "3.9"
 services:
   api_getaway:
     build:
-      dockerfile: Dockerfile
-      context: .
+      dockerfile: docker/Dockerfile
+      context: ../
     command: run
     ports:
       - "5000:5000"
+    environment:
+      - ENV=local
     restart: unless-stopped
 
 networks:
