@@ -66,7 +66,13 @@ func (m *UpdateUser) Validation() error {
 
 		validation.Field(&m.Role,
 			validation.Required,
-			validation.In(0, 1, 2, 3),
+			validation.In(
+				0,
+				1,
+				2,
+				3,
+				4,
+			),
 		),
 	)
 }
