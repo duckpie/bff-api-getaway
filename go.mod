@@ -9,7 +9,7 @@ require (
 	github.com/wrs-news/golang-proto v0.3.5
 )
 
-require github.com/duckpie/cherry v0.1.0
+require github.com/duckpie/cherry v0.1.1
 
 require (
 	github.com/asaskevich/govalidator v0.0.0-20200108200545-475eaeb16496 // indirect
