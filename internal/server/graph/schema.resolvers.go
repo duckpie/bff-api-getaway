@@ -35,7 +35,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) 
 		}
 
 		return resp, nil
-	}, 3, time.Second)
+	}, 2, time.Millisecond*500)
 
 	resp, err := rptr(ctx)
 	if err != nil {
@@ -63,7 +63,7 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUse
 		}
 
 		return resp, nil
-	}, 3, time.Second)
+	}, 2, time.Millisecond*500)
 
 	resp, err := rptr(ctx)
 	if err != nil {
@@ -86,7 +86,7 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, uuid string) (*model.
 		}
 
 		return resp, nil
-	}, 3, time.Second)
+	}, 2, time.Millisecond*500)
 
 	resp, err := rptr(ctx)
 	if err != nil {
@@ -112,7 +112,7 @@ func (r *mutationResolver) CreateAuth(ctx context.Context, input model.Login) (*
 		}
 
 		return resp, nil
-	}, 3, time.Second)
+	}, 2, time.Millisecond*500)
 
 	resp, err := rptr(ctx)
 	if err != nil {
@@ -134,7 +134,7 @@ func (r *mutationResolver) RefreshToken(ctx context.Context, token string) (*mod
 		}
 
 		return resp, nil
-	}, 3, time.Second)
+	}, 2, time.Millisecond*500)
 
 	resp, err := rptr(ctx)
 	if err != nil {
@@ -156,7 +156,7 @@ func (r *mutationResolver) Logout(ctx context.Context, accessToken string) (*mod
 		}
 
 		return resp, nil
-	}, 3, time.Second)
+	}, 2, time.Millisecond*500)
 
 	if _, err := rptr(ctx); err != nil {
 		return &model.StatusResp{Status: string(cherry.StatusFail)}, err
@@ -178,7 +178,7 @@ func (r *queryResolver) GetUserByUUID(ctx context.Context, uuid string) (*model.
 		}
 
 		return resp, nil
-	}, 3, time.Second)
+	}, 2, time.Millisecond*500)
 
 	resp, err := rptr(ctx)
 	if err != nil {
@@ -201,7 +201,7 @@ func (r *queryResolver) GetUserByLogin(ctx context.Context, login string) (*mode
 		}
 
 		return resp, nil
-	}, 3, time.Second)
+	}, 2, time.Millisecond*500)
 
 	resp, err := rptr(ctx)
 	if err != nil {
@@ -231,7 +231,7 @@ func (r *queryResolver) GetUsersSlice(ctx context.Context, limit int, offset int
 		}
 
 		return resp, nil
-	}, 3, time.Second)
+	}, 2, time.Millisecond*500)
 
 	resp, err := rptr(ctx)
 	if err != nil {
@@ -260,7 +260,7 @@ func (r *queryResolver) AuthCheck(ctx context.Context, accessToken string) (*mod
 		}
 
 		return resp, nil
-	}, 3, time.Second)
+	}, 2, time.Millisecond*500)
 
 	if _, err := rptr(ctx); err != nil {
 		return &model.StatusResp{Status: string(cherry.StatusFail)}, err
