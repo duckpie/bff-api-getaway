@@ -38,29 +38,25 @@ func (s *server) Run() (err error) {
 	log.Printf("connect to http://localhost:%d/ for GraphQL playground", s.cfg.Services.Server.Port)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", s.cfg.Services.Server.Port), nil))
 
-	return s.rlv.Clear()
+	return nil
 }
 
 func (s *server) Config() (err error) {
 	// Подключение микросевиса пользователей
-	if err := s.rlv.AddConnection(cherry.UMS, func() (*grpc.ClientConn, error) {
+	s.rlv.PrepareConn(cherry.UMS, func() (*grpc.ClientConn, error) {
 		return grpc.Dial(
 			fmt.Sprintf("%s:%d", s.cfg.Microservices.UserMs.Host, s.cfg.Microservices.UserMs.Port),
 			grpc.WithInsecure(),
 		)
-	}); err != nil {
-		return err
-	}
+	})
 
 	// Подключение микросервиса безопасности
-	if err := s.rlv.AddConnection(cherry.SMS, func() (*grpc.ClientConn, error) {
+	s.rlv.PrepareConn(cherry.SMS, func() (*grpc.ClientConn, error) {
 		return grpc.Dial(
 			fmt.Sprintf("%s:%d", s.cfg.Microservices.SecurityMs.Host, s.cfg.Microservices.SecurityMs.Port),
 			grpc.WithInsecure(),
 		)
-	}); err != nil {
-		return err
-	}
+	})
 
 	return
 }

@@ -6,40 +6,27 @@ import (
 	"google.golang.org/grpc"
 )
 
+type Connector func() (*grpc.ClientConn, error)
+
 type Resolver struct {
-	conn map[cherry.ConnKey]*grpc.ClientConn
+	conn map[cherry.ConnKey]Connector
 }
 
 type ResolverI interface {
 	Config() generated.Config
-	AddConnection(key cherry.ConnKey, connect func() (*grpc.ClientConn, error)) (err error)
-	Clear() (err error)
+	PrepareConn(key cherry.ConnKey, conn Connector)
 }
 
-func (r *Resolver) AddConnection(key cherry.ConnKey, connect func() (*grpc.ClientConn, error)) (err error) {
-	conn, err := connect()
-	if err != nil {
-		return err
-	}
-
+func (r *Resolver) PrepareConn(key cherry.ConnKey, conn Connector) {
 	r.conn[key] = conn
-	return
 }
 
 func (r *Resolver) Config() generated.Config {
 	return generated.Config{Resolvers: r}
 }
 
-func (r *Resolver) Clear() (err error) {
-	for _, c := range r.conn {
-		return c.Close()
-	}
-
-	return
-}
-
 func CreateResolver() *Resolver {
 	return &Resolver{
-		conn: make(map[cherry.ConnKey]*grpc.ClientConn),
+		conn: make(map[cherry.ConnKey]Connector),
 	}
 }

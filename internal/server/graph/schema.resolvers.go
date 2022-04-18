@@ -22,9 +22,15 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) 
 		return nil, err
 	}
 
-	conn := pbu.NewUserServiceClient(r.Resolver.conn[cherry.UMS])
+	conn, err := r.Resolver.conn[cherry.UMS]()
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+
+	client := pbu.NewUserServiceClient(conn)
 	rptr := cherrynet.GrpcRepeater(func(ctx context.Context) (interface{}, error) {
-		resp, err := conn.CreateUser(
+		resp, err := client.CreateUser(
 			ctx,
 			&pbu.NewUserReq{
 				Login:    input.Login,
@@ -53,9 +59,15 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUse
 		return nil, err
 	}
 
-	conn := pbu.NewUserServiceClient(r.Resolver.conn[cherry.UMS])
+	conn, err := r.Resolver.conn[cherry.UMS]()
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+
+	clinet := pbu.NewUserServiceClient(conn)
 	rptr := cherrynet.GrpcRepeater(func(ctx context.Context) (interface{}, error) {
-		resp, err := conn.UpdateUser(
+		resp, err := clinet.UpdateUser(
 			ctx,
 			&pbu.UpdateUserReq{
 				Uuid:  input.UUID,
@@ -85,9 +97,15 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, uuid string) (*model.
 		return nil, err
 	}
 
-	conn := pbu.NewUserServiceClient(r.Resolver.conn[cherry.UMS])
+	conn, err := r.Resolver.conn[cherry.UMS]()
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+
+	clinet := pbu.NewUserServiceClient(conn)
 	rptr := cherrynet.GrpcRepeater(func(ctx context.Context) (interface{}, error) {
-		resp, err := conn.DeleteUser(
+		resp, err := clinet.DeleteUser(
 			ctx,
 			&pbu.UserReqUuid{Uuid: uuid},
 			grpc.UseCompressor(gzip.Name),
@@ -112,9 +130,15 @@ func (r *mutationResolver) CreateAuth(ctx context.Context, input model.Login) (*
 		return nil, err
 	}
 
-	conn := pbs.NewSecurityServiceClient(r.Resolver.conn[cherry.SMS])
+	conn, err := r.Resolver.conn[cherry.SMS]()
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+
+	client := pbs.NewSecurityServiceClient(conn)
 	rptr := cherrynet.GrpcRepeater(func(ctx context.Context) (interface{}, error) {
-		resp, err := conn.Login(
+		resp, err := client.Login(
 			ctx,
 			&pbs.LoginReq{
 				Login:    input.Login,
@@ -141,9 +165,15 @@ func (r *mutationResolver) CreateAuth(ctx context.Context, input model.Login) (*
 }
 
 func (r *mutationResolver) RefreshToken(ctx context.Context, token string) (*model.Tokens, error) {
-	conn := pbs.NewSecurityServiceClient(r.Resolver.conn[cherry.SMS])
+	conn, err := r.Resolver.conn[cherry.SMS]()
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+
+	client := pbs.NewSecurityServiceClient(conn)
 	rptr := cherrynet.GrpcRepeater(func(ctx context.Context) (interface{}, error) {
-		resp, err := conn.RefreshToken(
+		resp, err := client.RefreshToken(
 			ctx,
 			&pbs.RefreshTokenReq{Token: token},
 			grpc.UseCompressor(gzip.Name),
@@ -167,9 +197,15 @@ func (r *mutationResolver) RefreshToken(ctx context.Context, token string) (*mod
 }
 
 func (r *mutationResolver) Logout(ctx context.Context, accessToken string) (*model.StatusResp, error) {
-	conn := pbs.NewSecurityServiceClient(r.Resolver.conn[cherry.SMS])
+	conn, err := r.Resolver.conn[cherry.SMS]()
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+
+	client := pbs.NewSecurityServiceClient(conn)
 	rptr := cherrynet.GrpcRepeater(func(ctx context.Context) (interface{}, error) {
-		resp, err := conn.Logout(
+		resp, err := client.Logout(
 			ctx,
 			&pbs.LogoutReq{Token: accessToken},
 			grpc.UseCompressor(gzip.Name),
@@ -193,9 +229,15 @@ func (r *queryResolver) GetUserByUUID(ctx context.Context, uuid string) (*model.
 		return nil, err
 	}
 
-	conn := pbu.NewUserServiceClient(r.Resolver.conn[cherry.UMS])
+	conn, err := r.Resolver.conn[cherry.UMS]()
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+
+	client := pbu.NewUserServiceClient(conn)
 	rptr := cherrynet.GrpcRepeater(func(ctx context.Context) (interface{}, error) {
-		resp, err := conn.GetUserByUuid(
+		resp, err := client.GetUserByUuid(
 			ctx,
 			&pbu.UserReqUuid{Uuid: uuid},
 			grpc.UseCompressor(gzip.Name),
@@ -221,9 +263,15 @@ func (r *queryResolver) GetUserByLogin(ctx context.Context, login string) (*mode
 		return nil, err
 	}
 
-	conn := pbu.NewUserServiceClient(r.Resolver.conn[cherry.UMS])
+	conn, err := r.Resolver.conn[cherry.UMS]()
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+
+	client := pbu.NewUserServiceClient(conn)
 	rptr := cherrynet.GrpcRepeater(func(ctx context.Context) (interface{}, error) {
-		resp, err := conn.GetUserByLogin(
+		resp, err := client.GetUserByLogin(
 			ctx,
 			&pbu.UserReqLogin{Login: login},
 			grpc.UseCompressor(gzip.Name),
@@ -254,9 +302,15 @@ func (r *queryResolver) GetUsersSlice(ctx context.Context, limit int, offset int
 		return nil, err
 	}
 
-	conn := pbu.NewUserServiceClient(r.Resolver.conn[cherry.UMS])
+	conn, err := r.Resolver.conn[cherry.UMS]()
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+
+	client := pbu.NewUserServiceClient(conn)
 	rptr := cherrynet.GrpcRepeater(func(ctx context.Context) (interface{}, error) {
-		resp, err := conn.GetAll(
+		resp, err := client.GetAll(
 			ctx,
 			&pbu.SelectionReq{
 				Limit:  int32(limit),
@@ -290,9 +344,15 @@ func (r *queryResolver) AuthCheck(ctx context.Context, accessToken string) (*mod
 		return &model.StatusResp{Status: string(cherry.StatusFail)}, err
 	}
 
-	conn := pbs.NewSecurityServiceClient(r.Resolver.conn[cherry.SMS])
+	conn, err := r.Resolver.conn[cherry.SMS]()
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+
+	client := pbs.NewSecurityServiceClient(conn)
 	rptr := cherrynet.GrpcRepeater(func(ctx context.Context) (interface{}, error) {
-		resp, err := conn.AuthCheck(
+		resp, err := client.AuthCheck(
 			ctx,
 			&pbs.AuthCheckReq{AccessToken: accessToken},
 			grpc.UseCompressor(gzip.Name),
